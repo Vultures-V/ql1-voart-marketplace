@@ -1,11 +1,9 @@
-# Contributing to VOart
+# # Contributing to QL1 Voart Marketplace
 
-Thank you for your interest in contributing to VOart! This document provides guidelines for contributing to the project.
-
-## 🚀 Getting Started
+Thank you for your interest in contributing to QL1 Voart Marketplace! This project is supported by the Voart Vip Pass NFT community. This document provides guidelines for contributing to the project.## 🚀 Getting Started
 
 1. Fork the repository
-2. Clone your fork: `git clone https://github.com/yourusername/voart-marketplace.git`
+2. Clone your fork: `git clone https://github.com/Vultures-V/ql1-voart-marketplace.git`
 3. Create a new branch: `git checkout -b feature/your-feature-name`
 4. Make your changes
 5. Test thoroughly
@@ -29,9 +27,9 @@ Thank you for your interest in contributing to VOart! This document provides gui
 
 ### Testing
 - Test all changes locally before submitting
-- Ensure wallet connection works
 - Verify responsive design on mobile
 - Check console for errors
+- Use React/Next.js conventions for UI components (if applicable)
 
 ## 🐛 Reporting Bugs
 
@@ -51,8 +49,7 @@ We welcome feature suggestions! Please:
 - Consider implementation complexity
 
 ## 🔐 Security
-
-If you discover a security vulnerability, please email [your-security-email] instead of opening a public issue.
+If you discover a security vulnerability, please email venturesvone@gmail.com instead of opening a public issue.
 
 ## 📝 Documentation
 
@@ -70,6 +67,9 @@ Before submitting a PR, ensure:
 - [ ] Documentation is updated
 - [ ] Commit messages are clear
 
+## Note
+The QL1 Voart Marketplace's UI/UX is complete, but blockchain integrations are still under development. Plan your contributions accordingly.
+
 ## 🤝 Code of Conduct
 
 - Be respectful and inclusive
@@ -81,7 +81,6 @@ Before submitting a PR, ensure:
 
 If you have questions, feel free to:
 - Open a GitHub Discussion
-- Join our Discord [link]
-- Email us at [your-email]
+- Email us at [venturesvone@gmail.com]
 
-Thank you for contributing to VOart! 🎴
+Thank you for contributing to QL1 Voart Marketplace! 🎴
