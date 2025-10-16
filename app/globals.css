@@ -1,0 +1,693 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --background: oklch(0.08 0.02 240);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.12 0.02 240 / 0.8);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.12 0.02 240 / 0.95);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.6 0.25 260);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.2 0.02 240);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.15 0.02 240);
+  --muted-foreground: oklch(0.7 0 0);
+  --accent: oklch(0.18 0.02 240);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.985 0 0);
+  --border: oklch(0.25 0.02 240 / 0.3);
+  --input: oklch(0.6 0.25 260 / 0.15);
+  --ring: oklch(0.6 0.25 260);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --radius: 0.75rem;
+  --sidebar: oklch(0.12 0.02 240 / 0.9);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.6 0.25 260);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.18 0.02 240);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(0.25 0.02 240 / 0.3);
+  --sidebar-ring: oklch(0.6 0.25 260);
+  --font-cinzel: "Cinzel", serif; /* Assuming Cinzel font is imported elsewhere */
+  --color-navy: oklch(0.2 0.1 240);
+  --color-coral: oklch(0.65 0.2 25);
+  --color-cream: oklch(0.95 0.02 60);
+  --color-qom-gold: oklch(0.8 0.15 60);
+  /* Adding beautiful market data theme colors inspired by financial platforms */
+  --color-market-success: oklch(0.7 0.15 140);
+  --color-market-warning: oklch(0.8 0.15 60);
+  --color-market-info: oklch(0.7 0.15 220);
+  --color-market-card: oklch(0.98 0.005 240);
+  --color-market-card-dark: oklch(0.15 0.02 240 / 0.95);
+  --color-gradient-start: oklch(0.6 0.25 260);
+  --color-gradient-end: oklch(0.7 0.15 280);
+}
+
+.dark {
+  --background: oklch(0.08 0.02 240);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.12 0.02 240 / 0.8);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.12 0.02 240 / 0.95);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.6 0.25 260);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.2 0.02 240);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.15 0.02 240);
+  --muted-foreground: oklch(0.7 0 0);
+  --accent: oklch(0.18 0.02 240);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.985 0 0);
+  --border: oklch(0.25 0.02 240 / 0.3);
+  --input: oklch(0.6 0.25 260 / 0.15);
+  --ring: oklch(0.6 0.25 260);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --sidebar: oklch(0.12 0.02 240 / 0.9);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.6 0.25 260);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.18 0.02 240);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(0.25 0.02 240 / 0.3);
+  --sidebar-ring: oklch(0.6 0.25 260);
+  --font-sans: var(--font-cinzel);
+  --color-navy: oklch(0.2 0.1 240);
+  --color-coral: oklch(0.65 0.2 25);
+  --color-cream: oklch(0.95 0.02 60);
+  --color-qom-gold: oklch(0.8 0.15 60);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  /* Simplified radius values to avoid calc() in @theme inline */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --font-sans: var(--font-cinzel);
+  --color-navy: var(--color-navy);
+  --color-coral: var(--color-coral);
+  --color-cream: var(--color-cream);
+  --color-qom-gold: var(--color-qom-gold);
+  --color-market-success: var(--color-market-success);
+  --color-market-warning: var(--color-market-warning);
+  --color-market-info: var(--color-market-info);
+  --color-market-card: var(--color-market-card);
+  --color-market-card-dark: var(--color-market-card-dark);
+  --color-gradient-start: var(--color-gradient-start);
+  --color-gradient-end: var(--color-gradient-end);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    /* Adding geometric background image with overlay */
+    background-image: linear-gradient(oklch(0.08 0.02 240 / 0.85), oklch(0.08 0.02 240 / 0.85)),
+      url("/images/geometric-background.jpg");
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    /* Enhanced body typography for better readability */
+    font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Reverted to original bold typography hierarchy */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-sans;
+    text-shadow: 0 1px 2px oklch(0 0 0 / 0.1);
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    font-weight: 600;
+  }
+
+  h1 {
+    @apply text-4xl md:text-5xl lg:text-6xl;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    background: linear-gradient(135deg, oklch(0.985 0 0), oklch(0.8 0.15 260));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  h2 {
+    @apply text-2xl md:text-3xl lg:text-4xl;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+  }
+
+  h3 {
+    @apply text-xl md:text-2xl;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  h4 {
+    @apply text-lg md:text-xl;
+    font-weight: 600;
+  }
+
+  h5 {
+    @apply text-base md:text-lg;
+    font-weight: 600;
+  }
+
+  h6 {
+    @apply text-sm md:text-base;
+    font-weight: 600;
+  }
+
+  /* Reverted to original body text styling */
+  p {
+    @apply leading-relaxed;
+    font-weight: 400;
+    color: oklch(0.85 0 0);
+  }
+
+  /* Reverted text color hierarchy to original weights */
+  .text-muted-foreground {
+    color: oklch(0.65 0 0) !important;
+    font-weight: 400;
+  }
+
+  .text-foreground {
+    color: oklch(0.95 0 0) !important;
+    font-weight: 400;
+  }
+
+  /* Reverted small text styling */
+  small,
+  .text-xs,
+  .text-sm {
+    font-weight: 400;
+    letter-spacing: 0.01em;
+  }
+
+  .text-navy {
+    color: var(--color-navy);
+  }
+
+  .text-coral {
+    color: var(--color-coral);
+  }
+
+  .border-navy {
+    border-color: var(--color-navy);
+  }
+
+  .border-coral {
+    border-color: var(--color-coral);
+  }
+
+  .bg-navy {
+    background-color: var(--color-navy);
+  }
+
+  .bg-coral {
+    background-color: var(--color-coral);
+  }
+
+  .bg-cream {
+    background-color: var(--color-cream);
+  }
+
+  /* Added QOM gold color utilities */
+  .text-qom-gold {
+    color: oklch(0.8 0.15 60);
+  }
+
+  .bg-qom-gold {
+    background-color: oklch(0.8 0.15 60);
+  }
+
+  .border-qom-gold {
+    border-color: oklch(0.8 0.15 60);
+  }
+}
+
+@layer components {
+  .origami-card {
+    @apply bg-card/80 border border-border rounded-lg p-4 md:p-6 transition-all duration-300;
+    backdrop-filter: blur(10px);
+    background: oklch(0.12 0.02 240 / 0.8);
+    border: 1px solid oklch(0.25 0.02 240 / 0.3);
+    box-shadow: 0 4px 6px -1px oklch(0 0 0 / 0.1), 0 2px 4px -1px oklch(0 0 0 / 0.06), inset 0 1px 0
+      oklch(0.985 0 0 / 0.05);
+  }
+
+  .origami-card:hover {
+    animation: origami-fold 0.6s ease-in-out;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px oklch(0 0 0 / 0.2), 0 4px 6px -2px oklch(0 0 0 / 0.05), inset 0 1px 0
+      oklch(0.985 0 0 / 0.1);
+  }
+
+  .origami-button {
+    @apply bg-primary text-primary-foreground px-4 py-2 md:px-6 md:py-3 rounded-lg font-medium transition-all duration-300 text-sm md:text-base;
+    background: linear-gradient(135deg, oklch(0.6 0.25 260), oklch(0.5 0.3 280));
+    box-shadow: 0 2px 4px oklch(0 0 0 / 0.1), 0 0 20px oklch(0.6 0.25 260 / 0.3);
+  }
+
+  .origami-button:hover {
+    animation: origami-fold 0.4s ease-in-out;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px oklch(0 0 0 / 0.15), 0 0 30px oklch(0.6 0.25 260 / 0.5);
+  }
+
+  .scroll-ticker {
+    animation: scroll-ticker 30s linear infinite;
+  }
+
+  .scroll-ticker.paused {
+    animation-play-state: paused;
+  }
+
+  .metamask-crane {
+    @apply w-6 h-6 transition-transform duration-300;
+  }
+
+  .metamask-crane:hover {
+    animation: origami-fold 0.5s ease-in-out;
+  }
+
+  /* Enhanced input styling with blue theme and glow effects */
+  input[data-slot="input"],
+  textarea {
+    @apply text-sm md:text-base;
+    color: oklch(var(--foreground)) !important;
+    background: oklch(0.6 0.25 260 / 0.15) !important;
+    border: 1px solid oklch(0.6 0.25 260 / 0.3) !important;
+    backdrop-filter: blur(5px);
+    transition: all 0.3s ease;
+    padding: 0.625rem 0.75rem;
+  }
+
+  @media (min-width: 768px) {
+    input[data-slot="input"],
+    textarea {
+      padding: 0.75rem 1rem;
+    }
+  }
+
+  /* Enhanced navigation search input */
+  .nav-search-input {
+    background: oklch(0.6 0.25 260 / 0.15) !important;
+    border: 1px solid oklch(0.6 0.25 260 / 0.3) !important;
+    backdrop-filter: blur(5px);
+    color: oklch(0.985 0 0) !important;
+  }
+
+  .nav-search-input:focus {
+    background: oklch(0.6 0.25 260 / 0.2) !important;
+    border-color: oklch(0.6 0.25 260) !important;
+    box-shadow: 0 0 0 2px oklch(0.6 0.25 260 / 0.2), 0 0 15px oklch(0.6 0.25 260 / 0.3);
+  }
+
+  .nav-search-input::placeholder {
+    color: oklch(0.7 0 0) !important;
+  }
+
+  /* Fixed metadata input interface styling to use proper color values instead of invalid Tailwind classes */
+  .metadata-input-card {
+    @apply bg-card/90 rounded-lg transition-all duration-300;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 6px -1px oklch(0 0 0 / 0.1), 0 2px 4px -1px oklch(0 0 0 / 0.06);
+    border: 2px solid oklch(0.2 0.1 240 / 0.3);
+  }
+
+  .workflow-step {
+    @apply space-y-4;
+  }
+
+  .step-header {
+    @apply flex items-center space-x-3 mb-4;
+  }
+
+  .step-number {
+    @apply w-8 h-8 rounded-full text-white font-bold text-sm flex items-center justify-center;
+    background-color: oklch(0.65 0.2 25);
+  }
+
+  .step-title {
+    @apply text-lg font-semibold text-foreground;
+  }
+
+  .step-content {
+    @apply ml-11 space-y-4;
+  }
+
+  .input-method-card {
+    @apply cursor-pointer transition-all duration-300;
+    border: 2px solid oklch(0.2 0.1 240 / 0.2);
+  }
+
+  .input-method-card:hover {
+    border-color: oklch(0.2 0.1 240 / 0.4);
+  }
+
+  .input-method-card.selected {
+    border-color: oklch(0.65 0.2 25);
+    background-color: oklch(0.65 0.2 25 / 0.05);
+  }
+
+  .json-upload-area {
+    @apply rounded-lg p-8 text-center transition-colors cursor-pointer;
+    border: 2px dashed oklch(0.2 0.1 240 / 0.3);
+  }
+
+  .json-upload-area:hover {
+    border-color: oklch(0.65 0.2 25 / 0.5);
+  }
+
+  .json-upload-label {
+    @apply cursor-pointer block;
+  }
+
+  .rarity-grid {
+    @apply space-y-3;
+  }
+
+  .rarity-level-row {
+    @apply flex items-center space-x-3 p-3 rounded-lg bg-background/50;
+    border: 1px solid oklch(0.2 0.1 240 / 0.2);
+  }
+
+  .add-button {
+    @apply bg-transparent transition-all duration-300;
+    border: 2px solid oklch(0.65 0.2 25 / 0.3);
+  }
+
+  .add-button:hover {
+    border-color: oklch(0.65 0.2 25);
+    background-color: oklch(0.65 0.2 25 / 0.05);
+  }
+
+  .distribution-status {
+    @apply p-3 rounded-lg border;
+  }
+
+  .distribution-status.valid {
+    @apply bg-green-50 border-green-200 text-green-800;
+  }
+
+  .distribution-status.invalid {
+    @apply bg-red-50 border-red-200 text-red-800;
+  }
+
+  .attribute-input-row {
+    @apply flex items-end space-x-4;
+  }
+
+  .attributes-list {
+    @apply space-y-2;
+  }
+
+  .attribute-item {
+    @apply flex items-center justify-between p-3 rounded-lg bg-background/50;
+    border: 1px solid oklch(0.2 0.1 240 / 0.2);
+  }
+
+  .validation-errors {
+    @apply p-4 border border-red-200 rounded-lg bg-red-50;
+  }
+
+  .export-button {
+    @apply bg-transparent transition-all duration-300;
+    border: 2px solid oklch(0.2 0.1 240 / 0.3);
+  }
+
+  .export-button:hover {
+    border-color: oklch(0.2 0.1 240);
+    background-color: oklch(0.2 0.1 240 / 0.05);
+  }
+
+  .preview-button {
+    @apply bg-transparent transition-all duration-300;
+    border: 2px solid oklch(0.65 0.2 25 / 0.3);
+  }
+
+  .preview-button:hover {
+    border-color: oklch(0.65 0.2 25);
+    background-color: oklch(0.65 0.2 25 / 0.05);
+  }
+
+  /* Adding form-specific styles inspired by the design */
+  .form-step {
+    @apply border-2 border-navy/30 rounded-lg p-6 bg-cream/5;
+    backdrop-filter: blur(10px);
+  }
+
+  .form-step-header {
+    @apply text-lg font-semibold text-navy mb-4 uppercase tracking-wide;
+  }
+
+  .form-input {
+    @apply w-full px-4 py-3 border-2 border-navy/30 rounded-lg bg-cream/10 text-foreground;
+    transition: all 0.3s ease;
+  }
+
+  .form-input:focus {
+    @apply border-coral outline-none;
+    box-shadow: 0 0 0 3px oklch(0.65 0.2 25 / 0.2);
+  }
+
+  .form-select {
+    @apply w-full px-4 py-3 border-2 border-navy/30 rounded-lg bg-cream/10 text-foreground cursor-pointer;
+    transition: all 0.3s ease;
+  }
+
+  .form-select:focus {
+    @apply border-coral outline-none;
+    box-shadow: 0 0 0 3px oklch(0.65 0.2 25 / 0.2);
+  }
+
+  .upload-area {
+    @apply border-2 border-dashed border-navy/30 rounded-lg p-8 text-center cursor-pointer transition-all duration-300;
+    background: oklch(0.95 0.02 60 / 0.05);
+  }
+
+  .upload-area:hover {
+    @apply border-coral;
+    background: oklch(0.65 0.2 25 / 0.05);
+  }
+
+  .coral-button {
+    @apply px-6 py-3 bg-coral text-white rounded-lg font-medium transition-all duration-300;
+    box-shadow: 0 2px 4px oklch(0 0 0 / 0.1);
+  }
+
+  .coral-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px oklch(0 0 0 / 0.15);
+  }
+
+  .navy-button {
+    @apply px-6 py-3 bg-navy text-white rounded-lg font-medium transition-all duration-300;
+    box-shadow: 0 2px 4px oklch(0 0 0 / 0.1);
+  }
+
+  .navy-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px oklch(0 0 0 / 0.15);
+  }
+
+  .trait-item {
+    @apply flex items-center justify-between p-3 border border-navy/20 rounded-lg bg-cream/5;
+  }
+
+  .qom-gold-button {
+    @apply px-6 py-3 bg-qom-gold text-white rounded-lg font-medium transition-all duration-300;
+    box-shadow: 0 2px 4px oklch(0 0 0 / 0.1);
+  }
+
+  .qom-gold-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px oklch(0 0 0 / 0.15);
+  }
+
+  /* Adding beautiful market data card styles inspired by financial platforms */
+  .market-data-card {
+    @apply relative overflow-hidden rounded-xl md:rounded-2xl transition-all duration-500 p-4 md:p-6;
+    background: linear-gradient(135deg, var(--color-market-card-dark), oklch(0.18 0.02 240 / 0.9));
+    border: 1px solid oklch(0.3 0.02 240 / 0.4);
+    backdrop-filter: blur(20px);
+    box-shadow: 0 8px 32px oklch(0 0 0 / 0.12), 0 2px 8px oklch(0 0 0 / 0.08), inset 0 1px 0 oklch(0.985 0 0 / 0.1);
+  }
+
+  .market-data-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 40px oklch(0 0 0 / 0.15), 0 8px 16px oklch(0 0 0 / 0.1), inset 0 1px 0 oklch(0.985 0 0 / 0.15);
+    border-color: oklch(0.6 0.25 260 / 0.6);
+  }
+
+  .market-data-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, oklch(0.6 0.25 260 / 0.5), transparent);
+  }
+
+  .market-price-display {
+    @apply text-2xl md:text-3xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent;
+    font-feature-settings: "tnum" 1;
+    letter-spacing: -0.02em;
+  }
+
+  .market-stat-card {
+    @apply relative rounded-xl p-4 transition-all duration-300;
+    background: linear-gradient(135deg, oklch(0.2 0.02 240 / 0.6), oklch(0.15 0.02 240 / 0.8));
+    border: 1px solid oklch(0.25 0.02 240 / 0.3);
+    backdrop-filter: blur(10px);
+  }
+
+  .market-stat-card:hover {
+    transform: translateY(-2px);
+    border-color: oklch(0.6 0.25 260 / 0.4);
+    box-shadow: 0 8px 16px oklch(0 0 0 / 0.1);
+  }
+
+  .market-badge {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium transition-all duration-200;
+    background: linear-gradient(135deg, oklch(0.6 0.25 260 / 0.2), oklch(0.7 0.15 280 / 0.2));
+    border: 1px solid oklch(0.6 0.25 260 / 0.3);
+    color: oklch(0.8 0.1 260);
+  }
+
+  .market-refresh-button {
+    @apply relative p-2 rounded-lg transition-all duration-300;
+    background: linear-gradient(135deg, oklch(0.6 0.25 260 / 0.1), oklch(0.7 0.15 280 / 0.1));
+    border: 1px solid oklch(0.6 0.25 260 / 0.2);
+  }
+
+  .market-refresh-button:hover {
+    background: linear-gradient(135deg, oklch(0.6 0.25 260 / 0.2), oklch(0.7 0.15 280 / 0.2));
+    border-color: oklch(0.6 0.25 260 / 0.4);
+    box-shadow: 0 0 20px oklch(0.6 0.25 260 / 0.3);
+  }
+
+  .market-network-info {
+    @apply relative rounded-xl p-4;
+    background: linear-gradient(135deg, oklch(0.8 0.15 60 / 0.1), oklch(0.7 0.15 40 / 0.1));
+    border: 1px solid oklch(0.8 0.15 60 / 0.2);
+    backdrop-filter: blur(10px);
+  }
+}
+
+/* Enhanced scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+@media (min-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+}
+
+::-webkit-scrollbar-track {
+  background: oklch(0.08 0.02 240);
+}
+
+::-webkit-scrollbar-thumb {
+  background: oklch(0.6 0.25 260 / 0.6);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.6 0.25 260);
+}
+
+/* Adding subtle animation keyframes */
+@keyframes geometric-pulse {
+  0%,
+  100% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes origami-fold {
+  0% {
+    transform: rotateY(0deg) scale(1);
+  }
+  50% {
+    transform: rotateY(5deg) scale(1.02);
+  }
+  100% {
+    transform: rotateY(0deg) scale(1);
+  }
+}
+
+/* Disable hover animations on touch devices */
+@media (hover: none) {
+  .origami-card:hover,
+  .origami-button:hover,
+  .market-data-card:hover {
+    transform: none;
+    animation: none;
+  }
+}

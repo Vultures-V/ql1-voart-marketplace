@@ -1,0 +1,40 @@
+{
+  "id": "/",
+  "name": "VOart NFT Marketplace",
+  "short_name": "VOart",
+  "description": "Discover, create, and trade unique NFTs on the QL1 blockchain",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#8B5CF6",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/voart-eagle-logo.png",
+      "sizes": "783x741",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/voart-eagle-logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/images/origami-logo-bg.jpg",
+      "sizes": "1920x1080",
+      "type": "image/jpeg",
+      "form_factor": "wide",
+      "label": "VOart Marketplace Desktop View"
+    },
+    {
+      "src": "/images/origami-logo-bg.jpg",
+      "sizes": "1080x1920",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "VOart Marketplace Mobile View"
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "name": "origami-marketplace-contracts",
+  "version": "1.0.0",
+  "description": "Smart contracts for Origami NFT Marketplace on QL1 Chain",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "deploy": "hardhat run scripts/deploy.js --network ql1"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.0.0"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "hardhat": "^2.19.0"
+  }
+}
