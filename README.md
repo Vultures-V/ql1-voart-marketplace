@@ -1,6 +1,6 @@
 # 🎴 VOart - NFT Marketplace
 
-> A premium NFT marketplace on QL1 blockchain with exclusive Beta Access protection.
+> The project is supported by the Voart Vip Pass NFT community. A premium NFT marketplace on the QL1 blockchain with exclusive Beta Access protection.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Next.js](https://img.shields.io/badge/Next.js-15-black)](https://nextjs.org/)
