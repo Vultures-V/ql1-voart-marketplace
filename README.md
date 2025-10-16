@@ -319,7 +319,7 @@ Security is our top priority. If you discover a security vulnerability, please e
 - **Documentation:** See `/docs` folder
 - **Twitter:** [@VVOART](https://twitter.com/VVOART)
 - **Telegram:** [Join our community](https://t.me/VulturesVLT)
-- **Website:** [voart.io]
+- 
 
 ## 🙏 Acknowledgments
 
