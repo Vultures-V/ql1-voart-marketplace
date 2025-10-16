@@ -85,8 +85,8 @@ VOart is a decentralized NFT marketplace built on the QL1 blockchain, featuring 
 
 \`\`\`bash
 # Clone the repository
-git clone https://github.com/yourusername/voart-marketplace.git
-cd voart-marketplace
+git clone https://github.com/Vultures-V/ql1-voart-marketplace.git
+cd ql1-voart-marketplace
 
 # Install dependencies
 npm install
