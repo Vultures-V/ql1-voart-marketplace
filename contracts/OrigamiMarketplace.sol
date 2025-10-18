@@ -538,6 +538,17 @@ contract OrigamiMarketplace is ReentrancyGuard, Ownable, Pausable {
     function getOffers(bytes32 offerId) external view returns (Offer[] memory) {
         return offers[offerId];
     }
+
+    /**
+     * @dev Check if NFT collection is valid (created by factory)
+     */
+    function _isValidCollection(address nftContract) private view returns (bool) {
+        try INFTFactory(nftFactory).isValidOrigamiNFT(nftContract) returns (bool isValid) {
+            return isValid;
+        } catch {
+            return false;
+        }
+    }
 }
 
 interface INFTFactory {
