@@ -12,6 +12,12 @@
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^4.0.0",
-    "hardhat": "^3.0.0"
+    "@nomicfoundation/hardhat-ethers": "^4.0.2",
+    "@nomicfoundation/hardhat-verify": "^3.0.3",
+    "@nomicfoundation/hardhat-ignition-ethers": "^3.0.3",
+    "@nomicfoundation/hardhat-network-helpers": "^3.0.1",
+    "@types/chai": "^5.2.2",
+    "chai": "^6.2.0",
+    "hardhat": "^3.0.7"
   }
 }
