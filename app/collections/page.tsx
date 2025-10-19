@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { OrigamiButton } from "@/components/ui/origami-button"
 import { Input } from "@/components/ui/input"
@@ -9,13 +9,50 @@ import { CollectionCard } from "@/components/collection-card"
 import { SearchIcon, FilterIcon, FolderIcon } from "@/components/simple-icons"
 import { useWallet } from "@/hooks/use-wallet"
 
-const mockCollections: any[] = []
-
 export default function CollectionsPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [sortBy, setSortBy] = useState("volume")
   const [filterCategory, setFilterCategory] = useState("all")
+  const [collections, setCollections] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
   const { isConnected } = useWallet()
+
+  useEffect(() => {
+    console.log("[v0] Loading collections from localStorage")
+    const loadCollections = () => {
+      try {
+        const storedCollections = JSON.parse(localStorage.getItem("user-collections") || "[]")
+        console.log("[v0] Loaded collections:", storedCollections)
+        setCollections(storedCollections)
+      } catch (error) {
+        console.error("[v0] Error loading collections:", error)
+        setCollections([])
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadCollections()
+
+    // Listen for storage changes
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "user-collections") {
+        console.log("[v0] Collections updated in localStorage")
+        loadCollections()
+      }
+    }
+
+    window.addEventListener("storage", handleStorageChange)
+    return () => window.removeEventListener("storage", handleStorageChange)
+  }, [])
+
+  const filteredCollections = collections.filter((collection) => {
+    const matchesSearch =
+      collection.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      collection.description?.toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesCategory = filterCategory === "all" || collection.category?.toLowerCase() === filterCategory
+    return matchesSearch && matchesCategory
+  })
 
   return (
     <div className="min-h-screen bg-background">
@@ -77,39 +114,63 @@ export default function CollectionsPage() {
 
         {/* Results Count */}
         <div className="flex justify-between items-center mb-6">
-          <p className="text-muted-foreground">Showing {mockCollections.length} collections</p>
+          <p className="text-muted-foreground">
+            Showing {filteredCollections.length} collection{filteredCollections.length !== 1 ? "s" : ""}
+          </p>
           <div className="flex items-center space-x-2">
             <FilterIcon className="w-4 h-4 text-muted-foreground" />
-            <span className="text-sm text-muted-foreground">Active filters: 0</span>
+            <span className="text-sm text-muted-foreground">
+              Active filters: {[searchQuery !== "", filterCategory !== "all"].filter(Boolean).length}
+            </span>
           </div>
         </div>
 
         {/* Collections Grid or Empty State */}
-        {mockCollections.length === 0 ? (
+        {isLoading ? (
+          <div className="text-center py-20">
+            <p className="text-muted-foreground">Loading collections...</p>
+          </div>
+        ) : filteredCollections.length === 0 ? (
           <div className="text-center py-20">
             <div className="max-w-md mx-auto">
               <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
                 <FolderIcon className="w-10 h-10 text-primary" />
               </div>
-              <h3 className="text-2xl font-semibold text-foreground mb-4">No Collections Yet</h3>
+              <h3 className="text-2xl font-semibold text-foreground mb-4">
+                {collections.length === 0 ? "No Collections Yet" : "No Matching Collections"}
+              </h3>
               <p className="text-muted-foreground mb-6">
-                Collections will appear here once artists start creating curated groups of NFTs.
+                {collections.length === 0
+                  ? "Collections will appear here once you create them. Start by creating your first collection!"
+                  : "No collections match your search criteria. Try adjusting your filters."}
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <OrigamiButton variant="secondary">Browse Marketplace</OrigamiButton>
+                {collections.length === 0 ? (
+                  <OrigamiButton href="/create-collection">Create Collection</OrigamiButton>
+                ) : (
+                  <OrigamiButton
+                    variant="secondary"
+                    onClick={() => {
+                      setSearchQuery("")
+                      setFilterCategory("all")
+                    }}
+                  >
+                    Clear Filters
+                  </OrigamiButton>
+                )}
               </div>
             </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {mockCollections.map((collection) => (
+            {filteredCollections.map((collection) => (
               <CollectionCard key={collection.id} collection={collection} />
             ))}
           </div>
         )}
 
         {/* Load More */}
-        {mockCollections.length > 0 && (
+        {filteredCollections.length > 0 && filteredCollections.length >= 12 && (
           <div className="text-center mt-12">
             <OrigamiButton variant="secondary">Load More Collections</OrigamiButton>
           </div>
