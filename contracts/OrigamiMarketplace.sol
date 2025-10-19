@@ -14,7 +14,6 @@ import "@openzeppelin/contracts/interfaces/IERC2981.sol";
  * Commission: 3% from buyer + 3% from seller = 6% total platform fee
  * Platform Donation: 1% of sale price from royalty
  * Creator Royalty: 0.1-5% (validated on-chain)
- * Whitelist: Admin-controlled access for listing and buying
  */
 contract OrigamiMarketplace is ReentrancyGuard, Ownable, Pausable {
     IERC20 public immutable qomToken;
@@ -27,12 +26,9 @@ contract OrigamiMarketplace is ReentrancyGuard, Ownable, Pausable {
     uint256 public constant MAX_ROYALTY = 500;       // 5%
     uint256 private constant BASIS_POINTS = 10000;
     
-    uint256 public constant MINIMUM_PRICE = 1 ether; // 1 QOM minimum
+    uint256 public MINIMUM_PRICE = 1 ether; // 1 QOM minimum (adjustable)
     uint256 public constant LISTING_DURATION = 30 days;
 
-    mapping(address => bool) public whitelist;
-    bool public whitelistEnabled;
-    uint256 public whitelistCount;
 
     struct Listing {
         uint256 tokenId;
@@ -41,7 +37,7 @@ contract OrigamiMarketplace is ReentrancyGuard, Ownable, Pausable {
         uint256 price;
         bool isActive;
         uint256 listedAt;
-        uint256 expiresAt; // Added expiration time
+        uint256 expiresAt;
     }
 
     struct Offer {
@@ -100,9 +96,12 @@ contract OrigamiMarketplace is ReentrancyGuard, Ownable, Pausable {
     
     event RoyaltyCapped(address indexed nftContract, uint256 indexed tokenId, uint256 cappedRoyalty);
 
-    event WhitelistEnabled(bool enabled);
-    event AddressWhitelisted(address indexed account, address indexed admin);
-    event AddressRemovedFromWhitelist(address indexed account, address indexed admin);
+
+    event RoyaltyInfoFailed(address indexed nftContract, uint256 indexed tokenId);
+
+    event MinimumPriceUpdated(uint256 oldPrice, uint256 newPrice);
+
+    event InvalidCollectionError(address indexed nftContract, string reason);
 
     constructor(address _qomToken, address _adminBudgetAddress, address _nftFactory) Ownable(msg.sender) {
         require(_qomToken != address(0), "Invalid QOM token address");
@@ -112,27 +111,21 @@ contract OrigamiMarketplace is ReentrancyGuard, Ownable, Pausable {
         qomToken = IERC20(_qomToken);
         adminBudgetAddress = _adminBudgetAddress;
         nftFactory = _nftFactory;
-        whitelistEnabled = false;
     }
 
-    modifier onlyWhitelisted() {
-        if (whitelistEnabled) {
-            require(whitelist[msg.sender] || msg.sender == owner(), "Not whitelisted");
-        }
-        _;
-    }
 
     /**
      * @dev List an NFT for sale
      * @param nftContract Address of the NFT contract
      * @param tokenId ID of the NFT to list
      * @param price Sale price in QOM tokens (must be >= MINIMUM_PRICE)
+     * @notice Anyone can list their NFTs without whitelist requirement
      */
     function listItem(
         address nftContract,
         uint256 tokenId,
         uint256 price
-    ) external nonReentrant onlyWhitelisted whenNotPaused {
+    ) external nonReentrant whenNotPaused { // Removed onlyWhitelisted modifier
         require(price >= MINIMUM_PRICE, "Price below minimum");
         
         require(_isValidCollection(nftContract), "Invalid NFT collection");
@@ -165,11 +158,12 @@ contract OrigamiMarketplace is ReentrancyGuard, Ownable, Pausable {
 
     /**
      * @dev Buy a listed NFT
-     * Buyer pays: price + 3% buyer commission
-     * Seller receives: price - 3% seller commission - royalty
-     * Platform receives: 6% total (3% from buyer + 3% from seller) + 1% donation from sale
+     * @param listingId The identifier of the listing
+     * @notice Buyer pays: price + 3% buyer commission
+     * @notice Seller receives: price - 3% seller commission - royalty
+     * @notice Platform receives: 6% total (3% from buyer + 3% from seller) + 1% donation from sale
      */
-    function buyItem(bytes32 listingId) external nonReentrant onlyWhitelisted whenNotPaused {
+    function buyItem(bytes32 listingId) external nonReentrant whenNotPaused { // Removed onlyWhitelisted modifier
         Listing storage listing = listings[listingId];
         require(listing.isActive && block.timestamp <= listing.expiresAt, "Listing expired or not active");
         require(msg.sender != listing.seller, "Cannot buy your own NFT");
@@ -178,17 +172,16 @@ contract OrigamiMarketplace is ReentrancyGuard, Ownable, Pausable {
         require(
             nft.isApprovedForAll(listing.seller, address(this)) || 
             nft.getApproved(listing.tokenId) == address(this),
-            "Marketplace not approved"
+            "Marketplace approval revoked"
         );
 
         uint256 price = listing.price;
         address seller = listing.seller;
         address buyer = msg.sender;
 
-        uint256 buyerCommission = (price * BUYER_COMMISSION) / BASIS_POINTS; // 3%
-        uint256 sellerCommission = (price * SELLER_COMMISSION) / BASIS_POINTS; // 3%
+        uint256 buyerCommission = (price * BUYER_COMMISSION) / BASIS_POINTS;
+        uint256 sellerCommission = (price * SELLER_COMMISSION) / BASIS_POINTS;
 
-        // Get and validate royalty
         (address royaltyReceiver, uint256 royaltyAmount) = _getRoyaltyInfo(
             listing.nftContract,
             listing.tokenId,
@@ -200,11 +193,9 @@ contract OrigamiMarketplace is ReentrancyGuard, Ownable, Pausable {
         uint256 creatorRoyalty = royaltyAmount;
         uint256 totalPlatformFee = buyerCommission + sellerCommission + actualPlatformDonation;
 
-        // Calculate payments
         uint256 totalBuyerPayment = price + buyerCommission;
         uint256 sellerNetAmount = price - sellerCommission - royaltyAmount;
 
-        // Transfer QOM from buyer to contract
         require(
             qomToken.transferFrom(buyer, address(this), totalBuyerPayment),
             "Payment failed"
@@ -217,7 +208,6 @@ contract OrigamiMarketplace is ReentrancyGuard, Ownable, Pausable {
             );
         }
 
-        // Pay seller
         require(
             qomToken.transfer(seller, sellerNetAmount),
             "Seller payment failed"
@@ -228,10 +218,8 @@ contract OrigamiMarketplace is ReentrancyGuard, Ownable, Pausable {
             "Platform fee payment failed"
         );
 
-        // Transfer NFT to buyer
         nft.safeTransferFrom(seller, buyer, listing.tokenId);
 
-        // Deactivate listing
         listing.isActive = false;
 
         emit ItemSold(
@@ -248,11 +236,13 @@ contract OrigamiMarketplace is ReentrancyGuard, Ownable, Pausable {
 
     /**
      * @dev Delist an NFT
+     * @param listingId The identifier of the listing
      */
     function delistItem(bytes32 listingId) external {
         Listing storage listing = listings[listingId];
         require(listing.seller == msg.sender, "Not the seller");
         require(listing.isActive, "Listing not active");
+        require(block.timestamp <= listing.expiresAt, "Listing already expired");
 
         listing.isActive = false;
 
@@ -266,6 +256,7 @@ contract OrigamiMarketplace is ReentrancyGuard, Ownable, Pausable {
      * @param seller Address of the NFT owner
      * @param offerAmount Offer amount in QOM tokens (must be >= MINIMUM_PRICE)
      * @param expiryDays Number of days until offer expires (1-30)
+     * @notice Anyone can make offers without whitelist requirement
      */
     function makeOffer(
         address nftContract,
@@ -273,7 +264,7 @@ contract OrigamiMarketplace is ReentrancyGuard, Ownable, Pausable {
         address seller,
         uint256 offerAmount,
         uint256 expiryDays
-    ) external nonReentrant onlyWhitelisted whenNotPaused {
+    ) external nonReentrant whenNotPaused { // Removed onlyWhitelisted modifier
         require(offerAmount >= MINIMUM_PRICE, "Offer below minimum");
         require(expiryDays > 0 && expiryDays <= 30, "Invalid expiry (1-30 days)");
         require(seller != msg.sender, "Cannot offer to yourself");
@@ -302,13 +293,18 @@ contract OrigamiMarketplace is ReentrancyGuard, Ownable, Pausable {
 
     /**
      * @dev Accept an offer
+     * @param offerId The identifier of the offer
+     * @param offerIndex Index of the offer in the offers array
+     * @param nftContract Address of the NFT contract
+     * @param tokenId ID of the NFT
+     * @notice Seller accepts buyer's offer and completes the sale
      */
     function acceptOffer(
         bytes32 offerId,
         uint256 offerIndex,
         address nftContract,
         uint256 tokenId
-    ) external nonReentrant onlyWhitelisted whenNotPaused { // Added whitelist and pause checks
+    ) external nonReentrant whenNotPaused { // Removed onlyWhitelisted modifier
         Offer storage offer = offers[offerId][offerIndex];
         require(offer.isActive, "Offer not active");
         require(offer.seller == msg.sender, "Not the seller");
@@ -320,17 +316,16 @@ contract OrigamiMarketplace is ReentrancyGuard, Ownable, Pausable {
         require(
             nft.isApprovedForAll(msg.sender, address(this)) || 
             nft.getApproved(tokenId) == address(this),
-            "Marketplace not approved"
+            "Marketplace approval revoked"
         );
 
         uint256 offerAmount = offer.offerAmount;
         address buyer = offer.buyer;
         address seller = msg.sender;
 
-        uint256 buyerCommission = (offerAmount * BUYER_COMMISSION) / BASIS_POINTS; // 3%
-        uint256 sellerCommission = (offerAmount * SELLER_COMMISSION) / BASIS_POINTS; // 3%
+        uint256 buyerCommission = (offerAmount * BUYER_COMMISSION) / BASIS_POINTS;
+        uint256 sellerCommission = (offerAmount * SELLER_COMMISSION) / BASIS_POINTS;
 
-        // Get and validate royalty
         (address royaltyReceiver, uint256 royaltyAmount) = _getRoyaltyInfo(
             nftContract,
             tokenId,
@@ -342,11 +337,9 @@ contract OrigamiMarketplace is ReentrancyGuard, Ownable, Pausable {
         uint256 creatorRoyalty = royaltyAmount;
         uint256 totalPlatformFee = buyerCommission + sellerCommission + actualPlatformDonation;
 
-        // Calculate payments
         uint256 totalBuyerPayment = offerAmount + buyerCommission;
         uint256 sellerNetAmount = offerAmount - sellerCommission - royaltyAmount;
 
-        // Transfer QOM from buyer
         require(
             qomToken.transferFrom(buyer, address(this), totalBuyerPayment),
             "Payment failed"
@@ -359,7 +352,6 @@ contract OrigamiMarketplace is ReentrancyGuard, Ownable, Pausable {
             );
         }
 
-        // Pay seller
         require(
             qomToken.transfer(seller, sellerNetAmount),
             "Seller payment failed"
@@ -370,10 +362,8 @@ contract OrigamiMarketplace is ReentrancyGuard, Ownable, Pausable {
             "Platform fee payment failed"
         );
 
-        // Transfer NFT
         nft.safeTransferFrom(seller, buyer, tokenId);
 
-        // Deactivate offer
         offer.isActive = false;
 
         emit OfferAccepted(offerId, nftContract, tokenId, buyer, offerAmount);
@@ -381,8 +371,10 @@ contract OrigamiMarketplace is ReentrancyGuard, Ownable, Pausable {
 
     /**
      * @dev Cancel an offer (buyer only)
+     * @param offerId The identifier of the offer
+     * @param offerIndex Index of the offer in the offers array
      */
-    function cancelOffer(bytes32 offerId, uint256 offerIndex) external onlyWhitelisted { // Added whitelist check
+    function cancelOffer(bytes32 offerId, uint256 offerIndex) external {
         Offer storage offer = offers[offerId][offerIndex];
         require(offer.buyer == msg.sender, "Not the buyer");
         require(offer.isActive, "Offer not active");
@@ -394,8 +386,10 @@ contract OrigamiMarketplace is ReentrancyGuard, Ownable, Pausable {
 
     /**
      * @dev Reject an offer (seller only)
+     * @param offerId The identifier of the offer
+     * @param offerIndex Index of the offer in the offers array
      */
-    function rejectOffer(bytes32 offerId, uint256 offerIndex) external onlyWhitelisted {
+    function rejectOffer(bytes32 offerId, uint256 offerIndex) external { // Removed onlyWhitelisted modifier
         Offer storage offer = offers[offerId][offerIndex];
         require(offer.seller == msg.sender, "Not the seller");
         require(offer.isActive, "Offer not active");
@@ -407,6 +401,7 @@ contract OrigamiMarketplace is ReentrancyGuard, Ownable, Pausable {
 
     /**
      * @dev Clean expired offers to optimize gas
+     * @param offerId The identifier of the offer group
      */
     function cleanExpiredOffers(bytes32 offerId) external {
         Offer[] storage offerList = offers[offerId];
@@ -416,6 +411,45 @@ contract OrigamiMarketplace is ReentrancyGuard, Ownable, Pausable {
                 emit OfferCancelled(offerId, i);
             }
         }
+    }
+
+    /**
+     * @dev Clean expired listings to optimize storage
+     * @param listingId The identifier of the listing to be cleaned
+     * @notice Automatically deactivates listings that have passed their expiration time
+     */
+    function cleanExpiredListings(bytes32 listingId) external {
+        Listing storage listing = listings[listingId];
+        require(listing.isActive && block.timestamp > listing.expiresAt, "Listing not expired or already inactive");
+        listing.isActive = false;
+        emit ItemDelisted(listingId);
+    }
+
+    /**
+     * @dev Clean multiple expired listings in a single transaction
+     * @param listingIds Array of listing identifiers to be cleaned
+     * @notice Gas-efficient batch cleanup for multiple expired listings
+     */
+    function cleanExpiredListingsBatch(bytes32[] calldata listingIds) external {
+        for (uint256 i = 0; i < listingIds.length; i++) {
+            Listing storage listing = listings[listingIds[i]];
+            if (listing.isActive && block.timestamp > listing.expiresAt) {
+                listing.isActive = false;
+                emit ItemDelisted(listingIds[i]);
+            }
+        }
+    }
+
+    /**
+     * @dev Update minimum price for listings and offers
+     * @param _newMinimumPrice New minimum price in QOM tokens (must be > 0)
+     * @notice Only owner can update the minimum price to adapt to QOM token value changes
+     */
+    function setMinimumPrice(uint256 _newMinimumPrice) external onlyOwner {
+        require(_newMinimumPrice > 0, "Invalid minimum price");
+        uint256 oldPrice = MINIMUM_PRICE;
+        MINIMUM_PRICE = _newMinimumPrice;
+        emit MinimumPriceUpdated(oldPrice, _newMinimumPrice);
     }
 
     /**
@@ -432,68 +466,21 @@ contract OrigamiMarketplace is ReentrancyGuard, Ownable, Pausable {
         _unpause();
     }
 
-    /**
-     * @dev Enable or disable whitelist requirement
-     */
-    function setWhitelistEnabled(bool _enabled) external onlyOwner {
-        whitelistEnabled = _enabled;
-        emit WhitelistEnabled(_enabled);
-    }
-
-    /**
-     * @dev Add address to whitelist
-     */
-    function addToWhitelist(address account) external onlyOwner {
-        require(account != address(0), "Invalid address");
-        require(!whitelist[account], "Already whitelisted");
-        
-        whitelist[account] = true;
-        whitelistCount++;
-        
-        emit AddressWhitelisted(account, msg.sender);
-    }
-
-    /**
-     * @dev Add multiple addresses to whitelist
-     */
-    function addToWhitelistBatch(address[] calldata accounts) external onlyOwner {
-        for (uint256 i = 0; i < accounts.length; i++) {
-            address account = accounts[i];
-            if (account != address(0) && !whitelist[account]) {
-                whitelist[account] = true;
-                whitelistCount++;
-                emit AddressWhitelisted(account, msg.sender);
-            }
-        }
-    }
-
-    /**
-     * @dev Remove address from whitelist
-     */
-    function removeFromWhitelist(address account) external onlyOwner {
-        require(whitelist[account], "Not whitelisted");
-        
-        whitelist[account] = false;
-        whitelistCount--;
-        
-        emit AddressRemovedFromWhitelist(account, msg.sender);
-    }
-
-    /**
-     * @dev Check if address is whitelisted
-     */
-    function isWhitelisted(address account) external view returns (bool) {
-        return whitelist[account] || account == owner();
-    }
 
     /**
      * @dev Get royalty info and validate it's within limits
+     * @param nftContract Address of the NFT contract
+     * @param tokenId ID of the NFT
+     * @param salePrice Sale price to calculate royalty from
+     * @return receiver Address to receive royalty payment
+     * @return royaltyAmount Amount of royalty to pay (capped at MAX_ROYALTY)
+     * @notice Emits RoyaltyInfoFailed event if royaltyInfo call fails
      */
     function _getRoyaltyInfo(
         address nftContract,
         uint256 tokenId,
         uint256 salePrice
-    ) private view returns (address receiver, uint256 royaltyAmount) {
+    ) private returns (address receiver, uint256 royaltyAmount) {
         try IERC2981(nftContract).royaltyInfo(tokenId, salePrice) returns (
             address _receiver,
             uint256 _royaltyAmount
@@ -505,48 +492,25 @@ contract OrigamiMarketplace is ReentrancyGuard, Ownable, Pausable {
             }
             return (_receiver, _royaltyAmount);
         } catch {
+            emit RoyaltyInfoFailed(nftContract, tokenId);
             return (address(0), 0);
         }
     }
 
     /**
-     * @dev Update admin budget address (owner only)
-     */
-    function updateAdminBudgetAddress(address _adminBudgetAddress) external onlyOwner {
-        require(_adminBudgetAddress != address(0), "Invalid address");
-        adminBudgetAddress = _adminBudgetAddress;
-    }
-
-    /**
-     * @dev Update NFT Factory address (owner only)
-     */
-    function updateNFTFactory(address _nftFactory) external onlyOwner {
-        require(_nftFactory != address(0), "Invalid factory address");
-        nftFactory = _nftFactory;
-    }
-
-    /**
-     * @dev Get listing details
-     */
-    function getListing(bytes32 listingId) external view returns (Listing memory) {
-        return listings[listingId];
-    }
-
-    /**
-     * @dev Get all offers for a listing
-     */
-    function getOffers(bytes32 offerId) external view returns (Offer[] memory) {
-        return offers[offerId];
-    }
-
-    /**
      * @dev Check if NFT collection is valid (created by factory)
+     * @param nftContract Address of the NFT contract to validate
+     * @return bool True if collection is valid, reverts otherwise
+     * @notice Reverts with detailed error message if validation fails
+     * @notice Emits InvalidCollectionError event on validation failure
      */
-    function _isValidCollection(address nftContract) private view returns (bool) {
+    function _isValidCollection(address nftContract) private returns (bool) { // Changed from view to non-view to emit event
         try INFTFactory(nftFactory).isValidOrigamiNFT(nftContract) returns (bool isValid) {
-            return isValid;
+            require(isValid, "NFT collection not created by factory");
+            return true;
         } catch {
-            return false;
+            emit InvalidCollectionError(nftContract, "Factory call failed");
+            revert("Invalid NFT collection or factory error");
         }
     }
 }
