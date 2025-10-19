@@ -152,6 +152,9 @@ export default function CreateCollectionPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    console.log("[v0] Collection creation started")
+
     if (!isConnected) {
       toast({
         title: "Wallet not connected",
@@ -186,37 +189,68 @@ export default function CreateCollectionPage() {
 
     setIsLoading(true)
     try {
-      const coverImageBase64 = coverImage ? await fileToBase64(coverImage) : ""
-      const logoBase64 = logo ? await fileToBase64(logo) : ""
+      console.log("[v0] Converting images to base64...")
+      let coverImageBase64 = ""
+      let logoBase64 = ""
+
+      try {
+        coverImageBase64 = coverImage ? await fileToBase64(coverImage) : ""
+        console.log("[v0] Cover image converted, size:", coverImageBase64.length)
+      } catch (error) {
+        console.error("[v0] Cover image conversion failed:", error)
+        throw new Error("Failed to process cover image")
+      }
+
+      try {
+        logoBase64 = logo ? await fileToBase64(logo) : ""
+        console.log("[v0] Logo converted, size:", logoBase64.length)
+      } catch (error) {
+        console.error("[v0] Logo conversion failed:", error)
+        throw new Error("Failed to process logo image")
+      }
 
       await new Promise((resolve) => setTimeout(resolve, 2000))
 
       const collectionId = `collection-${Date.now()}`
+      console.log("[v0] Creating collection with ID:", collectionId)
 
       const collectionData = {
         id: collectionId,
         ...formData,
-        coverImage: coverImageBase64, // Store base64 instead of filename
-        logo: logoBase64, // Store base64 instead of filename
+        coverImage: coverImageBase64,
+        logo: logoBase64,
         traits,
         createdAt: new Date().toISOString(),
         creator: address,
       }
 
-      const existingCollections = JSON.parse(localStorage.getItem("user-collections") || "[]")
-      existingCollections.push(collectionData)
-      localStorage.setItem("user-collections", JSON.stringify(existingCollections))
+      console.log("[v0] Collection data size:", JSON.stringify(collectionData).length, "bytes")
+
+      try {
+        const existingCollections = JSON.parse(localStorage.getItem("user-collections") || "[]")
+        console.log("[v0] Existing collections:", existingCollections.length)
+
+        existingCollections.push(collectionData)
+        localStorage.setItem("user-collections", JSON.stringify(existingCollections))
+        console.log("[v0] Collection saved to localStorage")
+      } catch (storageError) {
+        console.error("[v0] localStorage error:", storageError)
+        throw new Error("Failed to save collection. Storage quota may be exceeded. Try using smaller images.")
+      }
 
       toast({
         title: "Collection created successfully!",
         description: `${formData.name} has been created on ${formData.network}.`,
       })
 
+      console.log("[v0] Redirecting to collection management...")
       window.location.href = `/collection/${collectionId}/manage`
     } catch (error) {
+      console.error("[v0] Collection creation error:", error)
+      const errorMessage = error instanceof Error ? error.message : "Please try again later."
       toast({
         title: "Error creating collection",
-        description: "Please try again later.",
+        description: errorMessage,
         variant: "destructive",
       })
     } finally {
