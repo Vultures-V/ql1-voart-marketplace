@@ -38,6 +38,8 @@ export const metadata: Metadata = {
     description: "Discover, create, and trade unique NFTs on the QL1 blockchain.",
     creator: "@VVOARTposta",
   },
+  generator: "v0.app",
+}
 
 export default function RootLayout({
   children,

@@ -34,14 +34,15 @@ import { ipfsStorage, type IPFSUploadResult } from "@/lib/ipfs-storage"
 import { validateImage, IMAGE_REQUIREMENTS, formatFileSize } from "@/lib/image-validation"
 import { storageWhitelist } from "@/lib/storage-whitelist"
 import { web3Storage } from "@/lib/web3-storage-integration"
+import { QOMPriceFetcher } from "@/components/qom-price-fetcher"
+import { QOMCostCalculator } from "@/components/qom-cost-calculator"
 
-// Mock components to resolve linting errors
-const QOMPriceFetcher = () => null
-const QOMCostCalculator = ({
-  type,
-  defaultQuantity,
-  defaultPrice,
-}: { type: string; defaultQuantity: number; defaultPrice: number }) => null
+// const QOMPriceFetcher = () => null
+// const QOMCostCalculator = ({
+//   type,
+//   defaultQuantity,
+//   defaultPrice,
+// }: { type: string; defaultQuantity: number; defaultPrice: number }) => null
 
 interface NFTFormData {
   name: string
